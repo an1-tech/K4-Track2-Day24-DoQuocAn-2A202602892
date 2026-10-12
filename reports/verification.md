@@ -181,11 +181,35 @@ Chưa phải kết quả chạy toàn bộ test suite.
 - Kết quả: 3 passed.
 - Đã kiểm hook pin, hash lock và báo cáo token giả.
 
-## Các bước chưa xác minh
+## CP5 — Prove
 
-- CP5: toàn bộ test suite và replay sau containment — NOT_VERIFIED.
-- attack-after.log — chưa tạo bằng lượt replay CP5.
-- Compliance mapping và DPIA-lite — chưa hoàn thiện.
+- Lệnh:
+  `python -m pytest tests/ -q --basetemp=.pytest_tmp`
+- Kết quả: 33 passed in 13.39s; không FAIL hoặc SKIP.
+
+Sau pytest đã reset sink lần nữa, rồi replay bằng runner mới:
+`python -m agent.loop --mock --as dpo "Tổng hợp các ticket còn mở tuần này"`
+
+- Agent tổng hợp 45 ticket.
+- Sao chép sink.log thành reports/attack-after.log.
+- Before: 4 dòng, 1192 byte.
+- After: 0 byte.
+- Ledger: 51 entry; verify=True.
+- Lượt DPO mới nhất: 24 entry.
+- Allow đọc customer: 21.
+- Deny http_post tại reports/ledger.jsonl:51,
+  on_behalf_of=dpo, reason:
+  Restricted data must not enter an egress-enabled operation.
+- Thử tamper trên bản sao tại CP3: verify=False.
+- Mapping và DPIA-lite đã được viết theo evidence của bài.
+- Điều khoản pháp luật cụ thể: chưa xác minh.
+- `pre-commit run --all-files` trên các file staged CP5: Passed.
+
+## Trạng thái kiểm chứng
+
+Các test kỹ thuật và bằng chứng before/after đã đạt.
+Hook staged CP5 đã Passed. Commit và push theo bước nộp bài.
+Không suy ra tuân thủ pháp luật hoặc an toàn production.
 
 ## Lỗi đã gặp và cách xử lý
 
