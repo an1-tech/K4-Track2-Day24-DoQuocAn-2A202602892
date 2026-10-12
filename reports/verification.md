@@ -132,9 +132,57 @@ Snapshot ledger khi hoàn tất CP3:
 Tổng sáu nhóm test CP3: 23 test pass qua các lượt riêng.
 Chưa phải kết quả chạy toàn bộ test suite.
 
+## CP4 — Supply chain và secrets
+
+### Quét lịch sử
+
+- Gitleaks: 8.30.1.
+- Lệnh:
+  `gitleaks git --config .gitleaks.toml --redact --verbose .`
+- Kết quả: 1 finding, exit code 1.
+- Rule: lab24-synthetic-token.
+- File: lab-fake-secret.txt, dòng 1.
+- Commit: 1bdd849922156c868a5ee9293d68f5b72e242d2c.
+- Đây là token giả vô hiệu của bài lab.
+- Chi tiết: reports/secrets-incident.md.
+
+### Quét file hiện tại
+
+- Lệnh:
+  `gitleaks dir --config .gitleaks.toml --redact --verbose .`
+- Kết quả: no leaks found, exit code 0.
+- Không thêm allowlist hoặc tắt rule.
+
+### Hash lock
+
+- Lệnh:
+  `python -m pip install --force-reinstall --require-hashes -r requirements.lock`
+- Kết quả: cài lại thành công 10 package theo lock.
+- pip sử dụng các archive trong cache và chế độ kiểm hash.
+- Không chỉ dựa vào kết quả "Requirement already satisfied"
+  của lượt chuẩn bị.
+
+### Pre-commit hook
+
+- Cấu hình: .pre-commit-config.yaml.
+- Repo chính thức: https://github.com/gitleaks/gitleaks.
+- rev: v8.30.1.
+- Hook: gitleaks-system.
+- pass_filenames: false.
+- Cấu hình scanner: .gitleaks.toml.
+- `pre-commit install`: thành công.
+- `pre-commit run --all-files`: Passed.
+- Hook quét thay đổi staged; quét toàn bộ lịch sử là lượt riêng.
+
+### Test
+
+- Lệnh:
+  `python -m pytest tests/test_supply_chain.py -v --basetemp=.pytest_tmp`
+- Kết quả: 3 passed.
+- Đã kiểm hook pin, hash lock và báo cáo token giả.
+
 ## Các bước chưa xác minh
 
-- CP4: quét lịch sử/current files và hook — NOT_VERIFIED.
 - CP5: toàn bộ test suite và replay sau containment — NOT_VERIFIED.
 - attack-after.log — chưa tạo bằng lượt replay CP5.
 - Compliance mapping và DPIA-lite — chưa hoàn thiện.
